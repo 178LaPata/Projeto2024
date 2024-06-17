@@ -1,0 +1,54 @@
+version: "3"
+services:
+  app:
+    container_name: AppServer
+    build: ./interface
+    restart: always
+    ports:
+      - "16001:16001"
+    networks:
+      - tpnet
+
+  data_server:
+    container_name: ApiServer
+    build: ./api
+    restart: always
+    environment:
+      - MONGODB_URL=mongodb://mongodb:27017/Gerador2024
+    ports:
+      - "16000:16000"
+    depends_on:
+      - mongodb
+    networks:
+      - tpnet
+
+  mongodb:
+    container_name: MongoDB
+    image: mongo
+    restart: always
+    ports:
+      - '27018:27017'
+    volumes:
+      - tpData:/data/db
+    networks:
+      - tpnet
+
+  auth_server:
+    container_name: AuthServer
+    build: ./auth
+    restart: always
+    environment:
+      - MONGODB_URL=mongodb://mongodb:27017/Gerador2024
+    ports:
+      - "16002:16002"
+    depends_on:
+      - mongodb
+    networks:
+      - tpnet
+      
+networks:
+  tpnet:
+    name: tpnet
+    driver: bridge
+volumes:
+  tpData:
